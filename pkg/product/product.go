@@ -15,6 +15,7 @@ type Models []*Model
 
 type Storage interface {
 	Migrate() error
+	Create(m *Model) error
 }
 
 type Service struct {
@@ -27,4 +28,8 @@ func NewService(s Storage) *Service {
 
 func (s *Service) Migrate() error {
 	return s.storage.Migrate()
+}
+func (s *Service) Create(m *Model) error {
+	m.CreatedAt = time.Now()
+	return s.storage.Create(m)
 }
