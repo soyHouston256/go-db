@@ -26,6 +26,8 @@ const (
 	psqlGetAllProduct = `SELECT id, name, observation, price, created_at, updated_at FROM products`
 
 	psqlGetProductByID = psqlGetAllProduct + " WHERE id = $1"
+
+	psqlkUpdateProduct = `UPDATE products SET name=$1, observation=$2, price=$3, updated_at=$4 WHERE id=$5`
 )
 
 type PsqlProduct struct {
@@ -95,6 +97,34 @@ func (p *PsqlProduct) GetByID(id uint) (*product.Model, error) {
 	}
 	defer stmt.Close()
 	return ScanRowProduct(stmt.QueryRow(id))
+}
+
+func (p *PsqlProduct) Update(m *product.Model) error {
+	stmt, err := p.db.Prepare(psqlkUpdateProduct)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	res, err := stmt.Exec(
+		m.Name,
+		stringToNull(m.Observation),
+		m.Price,
+		timeToNull(m.UpdatedAt),
+		m.ID)
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return fmt.Errorf("not exist the product with ID: %d", m.ID)
+	}
+	fmt.Print("Product updated")
+	return nil
 }
 
 func ScanRowProduct(s scanner) (*product.Model, error) {
