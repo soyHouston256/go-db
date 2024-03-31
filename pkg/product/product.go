@@ -38,6 +38,7 @@ type Storage interface {
 	Migrate() error
 	Create(m *Model) error
 	GetAll() (Models, error)
+	GetByID(id uint) (*Model, error)
 }
 
 type Service struct {
@@ -59,4 +60,8 @@ func (s *Service) Create(m *Model) error {
 
 func (s *Service) GetAll() (Models, error) {
 	return s.storage.GetAll()
+}
+
+func (s *Service) GetByID(id uint) (*Model, error) {
+	return s.storage.GetByID(id)
 }
