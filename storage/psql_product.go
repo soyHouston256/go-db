@@ -27,7 +27,9 @@ const (
 
 	psqlGetProductByID = psqlGetAllProduct + " WHERE id = $1"
 
-	psqlkUpdateProduct = `UPDATE products SET name=$1, observation=$2, price=$3, updated_at=$4 WHERE id=$5`
+	psqlUpdateProduct = `UPDATE products SET name=$1, observation=$2, price=$3, updated_at=$4 WHERE id=$5`
+
+	psqlDeleteProduct = `DELETE FROM products WHERE id=$1`
 )
 
 type PsqlProduct struct {
@@ -100,7 +102,7 @@ func (p *PsqlProduct) GetByID(id uint) (*product.Model, error) {
 }
 
 func (p *PsqlProduct) Update(m *product.Model) error {
-	stmt, err := p.db.Prepare(psqlkUpdateProduct)
+	stmt, err := p.db.Prepare(psqlUpdateProduct)
 	if err != nil {
 		return err
 	}
@@ -127,6 +129,20 @@ func (p *PsqlProduct) Update(m *product.Model) error {
 	return nil
 }
 
+func (p *PsqlProduct) Delete(id uint) error {
+	stmt, err := p.db.Prepare(psqlDeleteProduct)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(id)
+
+	if err != nil {
+		return err
+	}
+	fmt.Print("Product deleted")
+	return nil
+}
 func ScanRowProduct(s scanner) (*product.Model, error) {
 	m := &product.Model{}
 	observationNull := sql.NullString{}

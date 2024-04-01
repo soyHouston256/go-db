@@ -45,6 +45,7 @@ type Storage interface {
 	GetAll() (Models, error)
 	GetByID(id uint) (*Model, error)
 	Update(m *Model) error
+	Delete(id uint) error
 }
 
 type Service struct {
@@ -78,4 +79,11 @@ func (s *Service) Update(m *Model) error {
 	}
 	m.UpdatedAt = time.Now()
 	return s.storage.Update(m)
+}
+
+func (s *Service) Delete(id uint) error {
+	if id == 0 {
+		return ErrNotFound
+	}
+	return s.storage.Delete(id)
 }
