@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 )
 
@@ -29,6 +30,24 @@ func NewPostgresDB() {
 			log.Fatalf("cant do ping: %v", err)
 		}
 		fmt.Println("connected to db")
+	})
+}
+
+func NewMysqlDB() {
+	once.Do(func() {
+		var err error
+		//db, err = sql.Open("mysql", "root:password@tcp(localhost:3606)/")
+		db, err = sql.Open("mysql", "root:root@tcp(127.0.0.1)/golang?parseTime=true")
+
+		if err != nil {
+			log.Fatalf("cant open db connection: %v", err)
+			panic(err)
+		}
+
+		if err = db.Ping(); err != nil {
+			log.Fatalf("cant do ping: %v", err)
+		}
+		fmt.Println("connected to mysql db")
 	})
 }
 
