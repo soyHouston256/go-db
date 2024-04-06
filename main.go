@@ -11,13 +11,10 @@ func main() {
 
 	storageProduct := storage.NewMysqlProduct(storage.Pool())
 	serviceProduct := product.NewService(storageProduct)
-	m := &product.Model{
-		Name:        `Product 1`,
-		Observation: `This is the first product`,
-		Price:       100,
+
+	ms, err := serviceProduct.GetAll()
+	if err != nil {
+		panic(err)
 	}
-	if err := serviceProduct.Create(m); err != nil {
-		fmt.Println(err)
-	}
-	fmt.Printf("Migration product completed")
+	fmt.Printf("%s", ms)
 }
