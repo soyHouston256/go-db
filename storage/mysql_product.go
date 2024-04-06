@@ -15,8 +15,9 @@ const (
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     updated_at TIMESTAMP
     )`
-	mysqlCreateProduct = `INSERT INTO products(name, observation, price, created_at) VALUES(?, ?, ?, ?)`
-	mysqlGetAllProduct = `SELECT id, name, observation, price, created_at, updated_at FROM products`
+	mysqlCreateProduct  = `INSERT INTO products(name, observation, price, created_at) VALUES(?, ?, ?, ?)`
+	mysqlGetAllProduct  = `SELECT id, name, observation, price, created_at, updated_at FROM products`
+	mysqlGetProductByID = mysqlGetAllProduct + " WHERE id = ?"
 )
 
 type MysqlProduct struct {
@@ -74,8 +75,12 @@ func (p *MysqlProduct) GetAll() (product.Models, error) {
 }
 
 func (p *MysqlProduct) GetByID(id uint) (*product.Model, error) {
-	//TODO implement me
-	panic("implement me")
+	stmt, err := p.db.Prepare(mysqlGetProductByID)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	return ScanRowProduct(stmt.QueryRow(id))
 }
 
 func (p *MysqlProduct) Update(m *product.Model) error {

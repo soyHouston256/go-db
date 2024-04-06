@@ -12,7 +12,7 @@ func main() {
 	storageProduct := storage.NewMysqlProduct(storage.Pool())
 	serviceProduct := product.NewService(storageProduct)
 
-	ms, err := serviceProduct.GetAll()
+	ms, err := serviceProduct.GetByID(1)
 	if err != nil {
 		panic(err)
 	}
