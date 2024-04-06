@@ -1,37 +1,25 @@
 package main
 
 import (
-	"github.com/soyhouston256/go-db/pkg/invoice"
-	"github.com/soyhouston256/go-db/pkg/invoiceheader"
-	"github.com/soyhouston256/go-db/pkg/invoiceitem"
+	"fmt"
+	"github.com/soyhouston256/go-db/pkg/product"
 	"github.com/soyhouston256/go-db/storage"
 	"log"
 )
 
 func main() {
-	storage.NewMysqlDB()
+	driver := storage.Mysql
+	storage.New(driver)
+	myStorage, err := storage.DAOProduct(driver)
+	if err != nil {
+		log.Fatalf("Dao Product Error: %v", err)
+	}
+	serviceProduct := product.NewService(myStorage)
+	ms, err := serviceProduct.GetAll()
 
-	storageheader := storage.NewMysqlInvoiceHeader(storage.Pool())
-	storageItems := storage.NewMysqlInvoiceItem(storage.Pool())
-	storageInvoice := storage.NewMysqlInvoice(
-		storage.Pool(),
-		storageheader,
-		storageItems,
-	)
-	m := &invoice.Model{
-		Header: &invoiceheader.Model{
-			Client: "SoyHouston256",
-		},
-		Items: invoiceitem.Models{
-			&invoiceitem.Model{
-				ProductID: 2,
-				Quantity:  2,
-				Price:     20,
-			},
-		},
+	if err != nil {
+		log.Fatalf("Service Product Error: %v", err)
 	}
-	serviceInvoice := invoice.NewService(storageInvoice)
-	if err := serviceInvoice.Create(m); err != nil {
-		log.Fatalf("Invoice.Create: %v", err)
-	}
+	fmt.Printf("Product: %+v\n", ms)
+
 }

@@ -22,11 +22,11 @@ const (
 	mysqlDeleteProduct  = `DELETE FROM products WHERE id=?`
 )
 
-type MysqlProduct struct {
+type mysqlProduct struct {
 	db *sql.DB
 }
 
-func (p *MysqlProduct) Create(m *product.Model) error {
+func (p *mysqlProduct) Create(m *product.Model) error {
 	stmt, err := p.db.Prepare(mysqlCreateProduct)
 	if err != nil {
 		return err
@@ -51,7 +51,7 @@ func (p *MysqlProduct) Create(m *product.Model) error {
 	return nil
 }
 
-func (p *MysqlProduct) GetAll() (product.Models, error) {
+func (p *mysqlProduct) GetAll() (product.Models, error) {
 	stmt, err := p.db.Prepare(mysqlGetAllProduct)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func (p *MysqlProduct) GetAll() (product.Models, error) {
 	return ms, nil
 }
 
-func (p *MysqlProduct) GetByID(id uint) (*product.Model, error) {
+func (p *mysqlProduct) GetByID(id uint) (*product.Model, error) {
 	stmt, err := p.db.Prepare(mysqlGetProductByID)
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func (p *MysqlProduct) GetByID(id uint) (*product.Model, error) {
 	return ScanRowProduct(stmt.QueryRow(id))
 }
 
-func (p *MysqlProduct) Update(m *product.Model) error {
+func (p *mysqlProduct) Update(m *product.Model) error {
 	stmt, err := p.db.Prepare(mysqlUpdateProduct)
 	if err != nil {
 		return err
@@ -113,7 +113,7 @@ func (p *MysqlProduct) Update(m *product.Model) error {
 	return nil
 }
 
-func (p *MysqlProduct) Delete(id uint) error {
+func (p *mysqlProduct) Delete(id uint) error {
 	stmt, err := p.db.Prepare(mysqlDeleteProduct)
 	if err != nil {
 		return err
@@ -128,10 +128,10 @@ func (p *MysqlProduct) Delete(id uint) error {
 	return nil
 }
 
-func NewMysqlProduct(db *sql.DB) *MysqlProduct {
-	return &MysqlProduct{db}
+func newMysqlProduct(db *sql.DB) *mysqlProduct {
+	return &mysqlProduct{db}
 }
-func (p *MysqlProduct) Migrate() error {
+func (p *mysqlProduct) Migrate() error {
 	stmt, err := p.db.Prepare(mysqlMigrateProduct)
 	if err != nil {
 		return err

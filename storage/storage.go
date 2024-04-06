@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"fmt"
+	"github.com/soyhouston256/go-db/pkg/product"
 	"log"
 	"sync"
 	"time"
@@ -16,7 +17,25 @@ var (
 	once sync.Once
 )
 
-func NewPostgresDB() {
+type Driver string
+
+const (
+	Mysql    Driver = "mysql"
+	Postgres Driver = "postgres"
+)
+
+func New(d Driver) {
+	switch d {
+	case Mysql:
+		newMysqlDB()
+	case Postgres:
+		newPostgresDB()
+	default:
+		newMysqlDB()
+	}
+}
+
+func newPostgresDB() {
 	once.Do(func() {
 		var err error
 
@@ -33,7 +52,7 @@ func NewPostgresDB() {
 	})
 }
 
-func NewMysqlDB() {
+func newMysqlDB() {
 	once.Do(func() {
 		var err error
 		db, err = sql.Open("mysql", "root:root@tcp(127.0.0.1)/golang?parseTime=true")
@@ -74,4 +93,15 @@ func timeToNull(t time.Time) sql.NullTime {
 	nt.Time = t
 	nt.Valid = true
 	return nt
+}
+
+func DAOProduct(driver Driver) (product.Storage, error) {
+	switch driver {
+	case Mysql:
+		return newMysqlProduct(db), nil
+	case Postgres:
+		return newPsqlProduct(db), nil
+	default:
+		return newMysqlProduct(db), nil
+	}
 }
