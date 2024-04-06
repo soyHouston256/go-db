@@ -36,7 +36,6 @@ func NewPostgresDB() {
 func NewMysqlDB() {
 	once.Do(func() {
 		var err error
-		//db, err = sql.Open("mysql", "root:password@tcp(localhost:3606)/")
 		db, err = sql.Open("mysql", "root:root@tcp(127.0.0.1)/golang?parseTime=true")
 
 		if err != nil {
