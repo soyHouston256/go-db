@@ -18,6 +18,7 @@ const (
 	mysqlCreateProduct  = `INSERT INTO products(name, observation, price, created_at) VALUES(?, ?, ?, ?)`
 	mysqlGetAllProduct  = `SELECT id, name, observation, price, created_at, updated_at FROM products`
 	mysqlGetProductByID = mysqlGetAllProduct + " WHERE id = ?"
+	mysqlUpdateProduct  = `UPDATE products SET name=?, observation=?, price=?, updated_at=? WHERE id=?`
 )
 
 type MysqlProduct struct {
@@ -84,8 +85,31 @@ func (p *MysqlProduct) GetByID(id uint) (*product.Model, error) {
 }
 
 func (p *MysqlProduct) Update(m *product.Model) error {
-	//TODO implement me
-	panic("implement me")
+	stmt, err := p.db.Prepare(mysqlUpdateProduct)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	res, err := stmt.Exec(
+		m.Name,
+		stringToNull(m.Observation),
+		m.Price,
+		timeToNull(m.UpdatedAt),
+		m.ID)
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return fmt.Errorf("not exist the product with ID: %d", m.ID)
+	}
+	fmt.Print("Product updated")
+	return nil
 }
 
 func (p *MysqlProduct) Delete(id uint) error {

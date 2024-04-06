@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"github.com/soyhouston256/go-db/pkg/product"
 	"github.com/soyhouston256/go-db/storage"
+	"log"
 )
 
 func main() {
@@ -12,9 +12,15 @@ func main() {
 	storageProduct := storage.NewMysqlProduct(storage.Pool())
 	serviceProduct := product.NewService(storageProduct)
 
-	ms, err := serviceProduct.GetByID(1)
-	if err != nil {
-		panic(err)
+	m := &product.Model{
+		ID:          2,
+		Name:        "course of Go",
+		Observation: "course of Go beginner to master",
+		Price:       120,
 	}
-	fmt.Printf("%s", ms)
+
+	err := serviceProduct.Update(m)
+	if err != nil {
+		log.Fatalf("product.Update: %v", err)
+	}
 }
