@@ -15,6 +15,8 @@ const (
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     updated_at TIMESTAMP
     )`
+	mysqlCreateProduct = `INSERT INTO products(name, observation, price, created_at) VALUES(?, ?, ?, ?)`
+	mysqlGetAllProduct = `SELECT id, name, observation, price, created_at, updated_at FROM products`
 )
 
 type MysqlProduct struct {
@@ -22,13 +24,53 @@ type MysqlProduct struct {
 }
 
 func (p *MysqlProduct) Create(m *product.Model) error {
-	//TODO implement me
-	panic("implement me")
+	stmt, err := p.db.Prepare(mysqlCreateProduct)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	result, err := stmt.Exec(
+		m.Name,
+		stringToNull(m.Observation),
+		m.Price,
+		m.CreatedAt,
+	)
+	if err != nil {
+		return err
+	}
+	id, err := result.LastInsertId()
+
+	if err != nil {
+		return err
+	}
+	m.ID = uint(id)
+	fmt.Printf("Product created with ID: %d\n", m.ID)
+	return nil
 }
 
 func (p *MysqlProduct) GetAll() (product.Models, error) {
-	//TODO implement me
-	panic("implement me")
+	stmt, err := p.db.Prepare(mysqlGetAllProduct)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	ms := make(product.Models, 0)
+	for rows.Next() {
+		m, err := ScanRowProduct(rows)
+		if err != nil {
+			return nil, err
+		}
+		ms = append(ms, m)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return ms, nil
 }
 
 func (p *MysqlProduct) GetByID(id uint) (*product.Model, error) {

@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/soyhouston256/go-db/pkg/invoiceheader"
-	"github.com/soyhouston256/go-db/pkg/invoiceitem"
 	"github.com/soyhouston256/go-db/pkg/product"
 	"github.com/soyhouston256/go-db/storage"
 )
@@ -13,15 +11,13 @@ func main() {
 
 	storageProduct := storage.NewMysqlProduct(storage.Pool())
 	serviceProduct := product.NewService(storageProduct)
-	serviceProduct.Migrate()
-
-	storageHeader := storage.NewMysqlInvoiceHeader(storage.Pool())
-	serviceHeader := invoiceheader.NewService(storageHeader)
-	serviceHeader.Migrate()
-
-	storageInvoiceItem := storage.NewMysqlInvoiceItem(storage.Pool())
-	serviceInvoiceItem := invoiceitem.NewService(storageInvoiceItem)
-	serviceInvoiceItem.Migrate()
-
+	m := &product.Model{
+		Name:        `Product 1`,
+		Observation: `This is the first product`,
+		Price:       100,
+	}
+	if err := serviceProduct.Create(m); err != nil {
+		fmt.Println(err)
+	}
 	fmt.Printf("Migration product completed")
 }
