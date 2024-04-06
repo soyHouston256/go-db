@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/soyhouston256/go-db/pkg/invoiceheader"
-	"github.com/soyhouston256/go-db/pkg/product"
 )
 
 const (
@@ -13,36 +12,11 @@ const (
     		client VARCHAR(100) NOT NULL,
     		created_at TIMESTAMP NOT NULL DEFAULT now(),
     		updated_at TIMESTAMP)`
-	mysqlCreateInvoiceHeader = `INSERT INTO invoice_headers (client) VALUES ($1) RETURNING id, created_at`
+	mysqlCreateInvoiceHeader = `INSERT INTO invoice_headers (client) VALUES(?)`
 )
 
 type MysqlInvoiceHeader struct {
 	db *sql.DB
-}
-
-func (p *MysqlInvoiceHeader) Create(m *product.Model) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p *MysqlInvoiceHeader) GetAll() (product.Models, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p *MysqlInvoiceHeader) GetByID(id uint) (*product.Model, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p *MysqlInvoiceHeader) Update(m *product.Model) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p *MysqlInvoiceHeader) Delete(id uint) error {
-	//TODO implement me
-	panic("implement me")
 }
 
 func NewMysqlInvoiceHeader(db *sql.DB) *MysqlInvoiceHeader {
@@ -70,5 +44,15 @@ func (p *MysqlInvoiceHeader) CreateTx(tx *sql.Tx, model *invoiceheader.Model) er
 	}
 	defer stmt.Close()
 
-	return stmt.QueryRow(model.Client).Scan(&model.ID, &model.CreatedAt)
+	result, err := stmt.Exec(model.Client)
+	if err != nil {
+		return err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	model.ID = uint(id)
+	fmt.Printf("Invoice header created with ID: %d\n", model.ID)
+	return nil
 }

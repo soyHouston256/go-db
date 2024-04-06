@@ -18,7 +18,7 @@ const (
     		CONSTRAINT invoice_items_invoice_header_id_fk FOREIGN KEY (invoice_header_id) REFERENCES invoice_headers (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
     		CONSTRAINT invoice_items_product_id_fk FOREIGN KEY (product_id) REFERENCES products (id) ON UPDATE RESTRICT ON DELETE RESTRICT
     		)`
-	mysqlCreateInvoiceItem = `INSERT INTO invoice_items (invoice_header_id, product_id, quantity, price) VALUES ($1, $2, $3, $4) RETURNING id, created_at`
+	mysqlCreateInvoiceItem = `INSERT INTO invoice_items (invoice_header_id, product_id, quantity, price) VALUES (?, ?, ?, ?)`
 )
 
 type MysqlInvoiceItem struct {
@@ -51,10 +51,15 @@ func (p *MysqlInvoiceItem) CreateTx(tx *sql.Tx, invoiceHeaderID uint, ms invoice
 	defer stmt.Close()
 
 	for _, item := range ms {
-		err = stmt.QueryRow(invoiceHeaderID, item.ProductID, item.Quantity, item.Price).Scan(&item.ID, &item.CreatedAt)
+		result, err := stmt.Exec(invoiceHeaderID, item.ProductID, item.Quantity, item.Price)
 		if err != nil {
 			return err
 		}
+		id, err := result.LastInsertId()
+		if err != nil {
+			return err
+		}
+		item.ID = uint(id)
 	}
 	return nil
 }
